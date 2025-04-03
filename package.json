@@ -1,0 +1,12 @@
+{
+  "name": "ai-image-viewer",
+  "version": "1.0.0",
+  "description": "AI-powered image viewer",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^35.1.3"
+  }
+}

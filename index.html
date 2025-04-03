@@ -1,0 +1,27 @@
+const indexHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Viewer</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #image-container { margin-top: 20px; }
+        img { max-width: 80%; height: auto; display: block; margin: 0 auto; }
+        button { margin: 10px; padding: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>AI Image Viewer</h1>
+    <button id="select-folder">Select Folder</button>
+    <div id="image-container">
+        <img id="current-image" src="" alt="No Image Selected">
+    </div>
+    <button id="prev">Previous</button>
+    <button id="next">Next</button>
+    <script src="renderer.js"></script>
+</body>
+</html>
+`;
+fs.writeFileSync(path.join(__dirname, 'index.html'), indexHtml);
