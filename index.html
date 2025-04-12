@@ -1,27 +1,57 @@
-const indexHtml = `
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Image Viewer</title>
+<html>
+  <head>
+    <title>Image Viewer AI</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        #image-container { margin-top: 20px; }
-        img { max-width: 80%; height: auto; display: block; margin: 0 auto; }
-        button { margin: 10px; padding: 10px; cursor: pointer; }
+      #gallery {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .img-container {
+        width: 200px;
+        height: 200px;
+        overflow: hidden;
+      }
+      .img-container img {
+        width: 100%;
+        object-fit: cover;
+      }
+
+      #singleView {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+      }
+      #singleView img {
+        max-width: 80%;
+        max-height: 500px;
+        margin-bottom: 20px;
+      }
+
+      button {
+        margin: 5px;
+      }
     </style>
-</head>
-<body>
-    <h1>AI Image Viewer</h1>
-    <button id="select-folder">Select Folder</button>
-    <div id="image-container">
-        <img id="current-image" src="" alt="No Image Selected">
+  </head>
+  <body>
+    <h1>📁 Image Viewer AI</h1>
+    <button id="openFolder">Open Folder</button>
+    <div id="gallery"></div>
+    <button id="switchToSingleView" style="display:none;">View One-by-One</button>
+
+    <div id="singleView">
+      <img id="singleImage" src="" />
+      <div>
+        <button id="prevBtn">⬅️ Prev</button>
+        <button id="nextBtn">➡️ Next</button>
+        <button id="deleteBtn">🗑️ Delete</button>
+        <button id="saveBtn">💾 Save All to New Folder</button>
+        <button id="exitBtn">❌ Exit</button>
+      </div>
     </div>
-    <button id="prev">Previous</button>
-    <button id="next">Next</button>
+
     <script src="renderer.js"></script>
-</body>
+  </body>
 </html>
-`;
-fs.writeFileSync(path.join(__dirname, 'index.html'), indexHtml);

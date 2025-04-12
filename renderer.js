@@ -1,33 +1,74 @@
-const rendererJs = `
-const { ipcRenderer } = require('electron');
-let images = [];
+let imagePaths = [];
 let currentIndex = 0;
 
-document.getElementById('select-folder').addEventListener('click', async () => {
-    const result = await ipcRenderer.invoke('select-folder');
-    if (result && result.images.length > 0) {
-        images = result.images;
-        currentIndex = 0;
-        displayImage();
-    }
+const openFolderBtn = document.getElementById('openFolder');
+const gallery = document.getElementById('gallery');
+const singleView = document.getElementById('singleView');
+const switchToSingleBtn = document.getElementById('switchToSingleView');
+const singleImage = document.getElementById('singleImage');
+
+openFolderBtn.addEventListener('click', async () => {
+  imagePaths = await window.electronAPI.selectFolder();
+  gallery.innerHTML = '';
+  switchToSingleBtn.style.display = imagePaths.length ? 'block' : 'none';
+
+  imagePaths.forEach((src) => {
+    const container = document.createElement('div');
+    container.classList.add('img-container');
+
+    const img = document.createElement('img');
+    img.src = `file://${src}`;
+    container.appendChild(img);
+
+    gallery.appendChild(container);
+  });
 });
 
-document.getElementById('prev').addEventListener('click', () => {
-    if (images.length > 0) {
-        currentIndex = (currentIndex - 1 + images.length) % images.length;
-        displayImage();
-    }
+// Switch to single viewer mode
+switchToSingleBtn.addEventListener('click', () => {
+  currentIndex = 0;
+  showSingleImage();
+  gallery.style.display = 'none';
+  switchToSingleBtn.style.display = 'none';
+  singleView.style.display = 'flex';
 });
 
-document.getElementById('next').addEventListener('click', () => {
-    if (images.length > 0) {
-        currentIndex = (currentIndex + 1) % images.length;
-        displayImage();
-    }
-});
-
-function displayImage() {
-    document.getElementById('current-image').src = images[currentIndex];
+function showSingleImage() {
+  if (imagePaths[currentIndex]) {
+    singleImage.src = `file://${imagePaths[currentIndex]}`;
+  }
 }
-`;
-fs.writeFileSync(path.join(__dirname, 'renderer.js'), rendererJs);
+
+document.getElementById('prevBtn').addEventListener('click', () => {
+  if (currentIndex > 0) {
+    currentIndex--;
+    showSingleImage();
+  }
+});
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+  if (currentIndex < imagePaths.length - 1) {
+    currentIndex++;
+    showSingleImage();
+  }
+});
+
+document.getElementById('deleteBtn').addEventListener('click', async () => {
+  const deleted = await window.electronAPI.deleteImage(imagePaths[currentIndex]);
+  if (deleted) {
+    imagePaths.splice(currentIndex, 1);
+    if (currentIndex >= imagePaths.length) currentIndex--;
+    showSingleImage();
+  }
+});
+
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  await window.electronAPI.saveImages(imagePaths);
+  alert('Images copied to new folder!');
+});
+
+document.getElementById('exitBtn').addEventListener('click', () => {
+  singleView.style.display = 'none';
+  gallery.style.display = 'flex';
+  switchToSingleBtn.style.display = 'block';
+});

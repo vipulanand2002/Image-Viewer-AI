@@ -2,39 +2,57 @@ const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-let mainWindow;
+function createWindow() {
+  const win = new BrowserWindow({
+    width: 1000,
+    height: 800,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+    },
+  });
 
-app.whenReady().then(() => {
-    mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
-        webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false
-        }
+  win.loadFile('index.html');
+
+  ipcMain.handle('select-folder', async () => {
+    const result = await dialog.showOpenDialog(win, {
+      properties: ['openDirectory'],
     });
 
-    mainWindow.loadFile('index.html');
-});
+    if (result.canceled) return [];
 
-// Handle folder selection
-ipcMain.handle('select-folder', async () => {
-    const result = await dialog.showOpenDialog(mainWindow, {
-        properties: ['openDirectory']
-    });
-    
-    if (result.canceled) return null;
-    
     const folderPath = result.filePaths[0];
-    const files = fs.readdirSync(folderPath).filter(file =>
-        ['.jpg', '.png', '.jpeg', '.gif'].includes(path.extname(file).toLowerCase())
+    const files = fs.readdirSync(folderPath);
+    const imageFiles = files.filter((file) =>
+      /\.(jpg|jpeg|png|gif)$/i.test(file)
     );
-    
-    return { folderPath, images: files.map(file => path.join(folderPath, file)) };
-});
 
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
+    return imageFiles.map((file) => path.join(folderPath, file));
+  });
+
+  ipcMain.handle('delete-image', async (_, filePath) => {
+    try {
+      fs.unlinkSync(filePath);
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
     }
-});
+  });
+
+  ipcMain.handle('save-images', async (_, imagePaths) => {
+    const result = await dialog.showOpenDialog(win, {
+      properties: ['openDirectory', 'createDirectory'],
+      message: 'Select destination folder to save images',
+    });
+
+    if (result.canceled || !result.filePaths[0]) return;
+
+    const destFolder = result.filePaths[0];
+    imagePaths.forEach((imgPath) => {
+      const fileName = path.basename(imgPath);
+      const destPath = path.join(destFolder, fileName);
+      fs.copyFileSync(imgPath, destPath);
+    });
+  });
+}
+app.whenReady().then(createWindow);
