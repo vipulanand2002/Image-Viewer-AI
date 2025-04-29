@@ -1,5 +1,7 @@
 let imagePaths = [];
 let currentIndex = 0;
+let zoomLevel = 1;
+let rotation = 0;
 
 const openFolderBtn = document.getElementById('openFolder');
 const gallery = document.getElementById('gallery');
@@ -39,6 +41,23 @@ function showSingleImage() {
   }
 }
 
+function showSingleImage() {
+  if (imagePaths[currentIndex]) {
+    singleImage.src = `file://${imagePaths[currentIndex]}`;
+    resetTransform();
+  }
+}
+
+function resetTransform() {
+  zoomLevel = 1;
+  rotation = 0;
+  updateTransform();
+}
+
+function updateTransform() {
+  singleImage.style.transform = `scale(${zoomLevel}) rotate(${rotation}deg)`;
+}
+
 document.getElementById('prevBtn').addEventListener('click', () => {
   if (currentIndex > 0) {
     currentIndex--;
@@ -72,3 +91,58 @@ document.getElementById('exitBtn').addEventListener('click', () => {
   gallery.style.display = 'flex';
   switchToSingleBtn.style.display = 'block';
 });
+
+document.getElementById('zoomInBtn').addEventListener('click', () => {
+  zoomLevel += 0.1;
+  updateTransform();
+});
+
+document.getElementById('zoomOutBtn').addEventListener('click', () => {
+  zoomLevel = Math.max(0.1, zoomLevel - 0.1);
+  updateTransform();
+});
+
+document.getElementById('rotateBtn').addEventListener('click', () => {
+  rotation = (rotation + 90) % 360;
+  updateTransform();
+});
+
+document.addEventListener('keydown', (e) => {
+  switch (e.key) {
+    case '+':
+    case '=': // Shift + = also counts as +
+      zoomLevel += 0.1;
+      updateTransform();
+      break;
+    case '-':
+    case '_':
+      zoomLevel = Math.max(0.1, zoomLevel - 0.1);
+      updateTransform();
+      break;
+    case 'r':
+    case 'R':
+      rotation = (rotation + 90) % 360;
+      updateTransform();
+      break;
+    case 'ArrowRight':
+      if (currentIndex < imagePaths.length - 1) {
+        currentIndex++;
+        showSingleImage();
+      }
+      break;
+    case 'ArrowLeft':
+      if (currentIndex > 0) {
+        currentIndex--;
+        showSingleImage();
+      }
+      break;
+    case 'Delete':
+      deleteImage();
+      break;
+    case 'Escape':
+      document.getElementById('singleView').style.display = 'none';
+      document.getElementById('imageGrid').style.display = 'block';
+      break;
+  }
+});
+
