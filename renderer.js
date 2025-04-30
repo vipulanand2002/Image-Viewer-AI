@@ -6,40 +6,40 @@ let rotation = 0;
 const openFolderBtn = document.getElementById('openFolder');
 const gallery = document.getElementById('gallery');
 const singleView = document.getElementById('singleView');
-const switchToSingleBtn = document.getElementById('switchToSingleView');
+// const switchToSingleBtn = document.getElementById('switchToSingleView');
 const singleImage = document.getElementById('singleImage');
 
 openFolderBtn.addEventListener('click', async () => {
   imagePaths = await window.electronAPI.selectFolder();
   gallery.innerHTML = '';
-  switchToSingleBtn.style.display = imagePaths.length ? 'block' : 'none';
+  // switchToSingleBtn.style.display = imagePaths.length ? 'block' : 'none';
 
-  imagePaths.forEach((src) => {
+  imagePaths.forEach((src, index) => {
     const container = document.createElement('div');
     container.classList.add('img-container');
-
+  
     const img = document.createElement('img');
     img.src = `file://${src}`;
+    img.addEventListener('click', () => {
+      currentIndex = index;
+      showSingleImage();
+      gallery.style.display = 'none';
+      singleView.style.display = 'flex';
+    });
+  
     container.appendChild(img);
-
     gallery.appendChild(container);
-  });
+  });  
 });
 
 // Switch to single viewer mode
-switchToSingleBtn.addEventListener('click', () => {
-  currentIndex = 0;
-  showSingleImage();
-  gallery.style.display = 'none';
-  switchToSingleBtn.style.display = 'none';
-  singleView.style.display = 'flex';
-});
-
-function showSingleImage() {
-  if (imagePaths[currentIndex]) {
-    singleImage.src = `file://${imagePaths[currentIndex]}`;
-  }
-}
+// switchToSingleBtn.addEventListener('click', () => {
+//   currentIndex = 0;
+//   showSingleImage();
+//   gallery.style.display = 'none';
+//   switchToSingleBtn.style.display = 'none';
+//   singleView.style.display = 'flex';
+// });
 
 function showSingleImage() {
   if (imagePaths[currentIndex]) {
@@ -89,7 +89,6 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
 document.getElementById('exitBtn').addEventListener('click', () => {
   singleView.style.display = 'none';
   gallery.style.display = 'flex';
-  switchToSingleBtn.style.display = 'block';
 });
 
 document.getElementById('zoomInBtn').addEventListener('click', () => {
